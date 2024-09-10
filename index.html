@@ -1,1 +1,92 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anime Characters</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+        .character-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        .character-card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .character-card img {
+            max-width: 100%;
+            height: auto;
+        }
+        .pagination {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .pagination button {
+            margin: 0 5px;
+            padding: 10px 15px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Anime Characters</h1>
+    <div class="character-grid" id="characterGrid">
+        <!-- Characters will be loaded here -->
+    </div>
+
+    <div class="pagination" id="pagination">
+        <button onclick="loadPage(currentPage - 1)">Previous</button>
+        <button onclick="loadPage(currentPage + 1)">Next</button>
+    </div>
+
+    <script>
+        let currentPage = 1;
+
+        async function loadPage(page) {
+            if (page < 1) return;
+
+            const response = await fetch(`/characters/${page}`);
+            const data = await response.json();
+
+            const grid = document.getElementById('characterGrid');
+            grid.innerHTML = ''; // Clear existing content
+
+            data.characters.forEach(character => {
+                const characterCard = document.createElement('div');
+                characterCard.classList.add('character-card');
+
+                const img = document.createElement('img');
+                img.src = character.img_url;
+                img.alt = character.name;
+
+                const name = document.createElement('h3');
+                name.textContent = character.name;
+
+                characterCard.appendChild(img);
+                characterCard.appendChild(name);
+                grid.appendChild(characterCard);
+            });
+
+            currentPage = data.current_page;
+
+            // Disable buttons if no more pages
+            document.querySelector('.pagination button:nth-child(1)').disabled = currentPage === 1;
+            document.querySelector('.pagination button:nth-child(2)').disabled = data.characters.length < 9;
+        }
+
+        // Load initial page
+        loadPage(1);
+    </script>
+</body>
+</html>
